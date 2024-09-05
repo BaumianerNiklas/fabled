@@ -7,20 +7,21 @@ defmodule Fabled.Lobby do
   use GenServer
   alias Fabled.Player
 
-  @enforce_keys [:id]
-  defstruct [:id, players: []]
+  @enforce_keys [:id, :owner] 
+  defstruct [:id, :owner, players: []]
 
   @type t :: %__MODULE__{
     id: String.t(),
-    players: [Player.t()]
+    players: [Player.t()],
+    owner: Player.t(),
   }
 
   ### Client Code
   # Interface the client uses to work with lobbies
 
-  @spec new() :: t()
-  def new() do
-    GenServer.call(__MODULE__, :new)
+  @spec new(Player.t()) :: t()
+  def new(creator) do
+    GenServer.call(__MODULE__, {:new, creator})
   end
 
   @spec add_player(t(), Player.t()) :: t()
@@ -47,9 +48,12 @@ defmodule Fabled.Lobby do
   end
 
   @impl true
-  def handle_call(:new, _from, table) do
+  def handle_call({:new, creator}, _from, table) do
     id = Nanoid.generate()
-    lobby = %__MODULE__{id: id}
+    lobby = %__MODULE__{
+      id: id,
+      owner: creator, 
+    }
 
     true = :ets.insert(table, {id, lobby})
 
