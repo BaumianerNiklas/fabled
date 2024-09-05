@@ -1,9 +1,10 @@
 defmodule Fabled.Lobby do
   @enforce_keys [:id]
-  defstruct [:id]
+  defstruct [:id, players: []]
 
   @type t :: %__MODULE__{
-    id: String.t()
+    id: String.t(),
+    players: [Player.t()]
   }
 
   @spec new() :: t()
