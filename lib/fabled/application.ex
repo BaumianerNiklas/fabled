@@ -8,6 +8,9 @@ defmodule Fabled.Application do
   @impl true
   def start(_type, _args) do
     children = [
+      # ETS tables
+      Fabled.Lobby,
+
       FabledWeb.Telemetry,
       {DNSCluster, query: Application.get_env(:fabled, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: Fabled.PubSub},
