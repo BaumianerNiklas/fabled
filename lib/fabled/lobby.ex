@@ -30,8 +30,13 @@ defmodule Fabled.Lobby do
   end
 
   @spec fetch(String.t()) :: {:ok, t()} | :error
-  def fetch(lobbyId) do
-    GenServer.call(__MODULE__, {:fetch, lobbyId})
+  def fetch(lobby_id) do
+    GenServer.call(__MODULE__, {:fetch, lobby_id})
+  end
+
+  @spec fetch_player(String.t(), String.t()) :: Player.t()
+  def fetch_player(lobby, player_id) do
+    GenServer.call(__MODULE__, {:fetch_player, lobby, player_id})
   end
 
   ### GenServer Implementation 
@@ -61,8 +66,8 @@ defmodule Fabled.Lobby do
   end
 
   @impl true
-  def handle_call({:fetch, lobbyId}, _from, table) do
-    case :ets.lookup(:lobbies, lobbyId) do
+  def handle_call({:fetch, lobby_id}, _from, table) do
+    case :ets.lookup(:lobbies, lobby_id) do
       [] -> {:reply, :error, table}
       [{_id, lobby} | _rest] -> {:reply, {:ok, lobby}, table}
     end
@@ -76,5 +81,15 @@ defmodule Fabled.Lobby do
     true = :ets.insert(table, {lobby.id, lobby})
 
     {:reply, lobby, table}
+  end
+
+  @impl true
+  def handle_call({:fetch_player, lobby, player_id}, _from, table) do
+    [{_id, lobby} | _rest] = :ets.lookup(table, lobby.id)    
+
+    case Enum.find(lobby.players, & &1.id == player_id) do
+      nil -> {:reply, :error, table}
+      player -> {:reply, {:ok, player}, table}
+    end
   end
 end
