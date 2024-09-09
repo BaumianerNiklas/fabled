@@ -7,7 +7,7 @@ defmodule Fabled.Lobby do
   use GenServer
   alias Fabled.Player
 
-  @enforce_keys [:id, :owner] 
+  @enforce_keys [:id, :owner]
   defstruct [:id, :owner, players: []]
 
   @type t :: %__MODULE__{
@@ -34,19 +34,19 @@ defmodule Fabled.Lobby do
     GenServer.call(__MODULE__, {:fetch, lobby_id})
   end
 
-  @spec fetch_player(String.t(), String.t()) :: Player.t()
+  @spec fetch_player(t(), String.t()) :: {:ok, Player.t()} | :error
   def fetch_player(lobby, player_id) do
     GenServer.call(__MODULE__, {:fetch_player, lobby, player_id})
   end
 
-  ### GenServer Implementation 
+  ### GenServer Implementation
   # Handles access to the ETS tables
 
   def start_link(opts) do
     GenServer.start_link(__MODULE__, opts, name: __MODULE__)
   end
 
-  @impl true 
+  @impl true
   def init([]) do
     table = :ets.new(:lobbies, [:set, :protected, :named_table])
     {:ok, table}
@@ -57,7 +57,7 @@ defmodule Fabled.Lobby do
     id = Nanoid.generate()
     lobby = %__MODULE__{
       id: id,
-      owner: creator, 
+      owner: creator,
     }
 
     true = :ets.insert(table, {id, lobby})
@@ -75,7 +75,7 @@ defmodule Fabled.Lobby do
 
   @impl true
   def handle_call({:add_player, lobby, player}, _from, table) do
-    lobby = Map.update(lobby, :players, [player], fn prev -> [player | prev] end) 
+    lobby = Map.update(lobby, :players, [player], fn prev -> [player | prev] end)
 
     # insert/2 replaces old values if key already exists.
     true = :ets.insert(table, {lobby.id, lobby})
@@ -85,7 +85,7 @@ defmodule Fabled.Lobby do
 
   @impl true
   def handle_call({:fetch_player, lobby, player_id}, _from, table) do
-    [{_id, lobby} | _rest] = :ets.lookup(table, lobby.id)    
+    [{_id, lobby} | _rest] = :ets.lookup(table, lobby.id)
 
     case Enum.find(lobby.players, & &1.id == player_id) do
       nil -> {:reply, :error, table}
