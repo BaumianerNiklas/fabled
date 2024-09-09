@@ -3,20 +3,35 @@ defmodule FabledWeb.GameLive do
 
   alias Fabled.Lobby
 
-  def mount(%{"lobby" => lobbyId}, session, socket) do
-    case Lobby.fetch(lobbyId) do
+  def mount(%{"lobby" => lobby_id}, session, socket) do
+    case Lobby.fetch(lobby_id) do
       :error ->
-        {:ok, push_navigate(socket, to: ~p"/")}
-
-      {:ok, lobby} ->
-        {:ok, player} = Lobby.fetch_player(lobby, session["player_id"])
-
         socket =
           socket
-          |> assign(lobby: lobby)
-          |> assign(player: player)
+          |> put_flash(
+            :error,
+            "You tried joining a lobby that does not exist or is already over."
+          )
+          |> push_navigate(to: ~p"/")
 
         {:ok, socket}
+
+      {:ok, lobby} ->
+        case Lobby.fetch_player(lobby, session["player_id"]) do
+          # When player is not already known, just redirect to the invite link page
+          # where they can give themselves a name and join the lobby
+          :error ->
+            socket = push_navigate(socket, to: ~p"/join?lobby=#{lobby.id}")
+            {:ok, socket}
+
+          {:ok, player} ->
+            socket =
+              socket
+              |> assign(lobby: lobby)
+              |> assign(player: player)
+
+            {:ok, socket}
+        end
     end
   end
 
