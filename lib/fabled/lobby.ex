@@ -11,10 +11,10 @@ defmodule Fabled.Lobby do
   defstruct [:id, :owner, players: []]
 
   @type t :: %__MODULE__{
-    id: String.t(),
-    players: [Player.t()],
-    owner: Player.t(),
-  }
+          id: String.t(),
+          players: [Player.t()],
+          owner: Player.t()
+        }
 
   ### Client Code
   # Interface the client uses to work with lobbies
@@ -55,9 +55,10 @@ defmodule Fabled.Lobby do
   @impl true
   def handle_call({:new, creator}, _from, table) do
     id = Nanoid.generate()
+
     lobby = %__MODULE__{
       id: id,
-      owner: creator,
+      owner: creator
     }
 
     true = :ets.insert(table, {id, lobby})
@@ -87,7 +88,7 @@ defmodule Fabled.Lobby do
   def handle_call({:fetch_player, lobby, player_id}, _from, table) do
     [{_id, lobby} | _rest] = :ets.lookup(table, lobby.id)
 
-    case Enum.find(lobby.players, & &1.id == player_id) do
+    case Enum.find(lobby.players, &(&1.id == player_id)) do
       nil -> {:reply, :error, table}
       player -> {:reply, {:ok, player}, table}
     end
