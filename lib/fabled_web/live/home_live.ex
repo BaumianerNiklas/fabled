@@ -29,8 +29,6 @@ defmodule FabledWeb.HomeLive do
     player = Player.new(name)
     lobby = Lobby.new(player) |> Lobby.add_player(player)
 
-    IO.inspect(socket)
-
     socket =
       socket
       |> push_navigate(to: ~p"/join?lobby=#{lobby.id}&player=#{player.id}")
