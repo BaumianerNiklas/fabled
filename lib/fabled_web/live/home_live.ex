@@ -2,10 +2,14 @@ defmodule FabledWeb.HomeLive do
   use FabledWeb, :live_view
 
   alias Fabled.Lobby
+  alias Fabled.Player
 
   @impl true
   def mount(_params, _session, socket) do
-    socket = assign(socket, lobby: nil)
+    socket =
+      socket
+      |> assign(lobby: nil)
+      |> assign(form: to_form(%{"player_name" => nil}))
 
     {:ok, socket}
   end
@@ -13,20 +17,23 @@ defmodule FabledWeb.HomeLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <button phx-click="create_lobby"> hit me up with a new lobby </button>
-    <%= if @lobby != nil do %>
-    <%= @lobby.id %>
-    <% end %>
+    <.form for={@form} phx-submit="create_lobby">
+      <.input type="text" field={@form[:player_name]} placeholder="your name" />
+      <button>Create new Lobby</button>
+    </.form>
     """
   end
 
   @impl true
-  def handle_event("create_lobby", _params, socket) do
-    IO.puts("we received a click ayooo")
+  def handle_event("create_lobby", %{"player_name" => name}, socket) do
+    player = Player.new(name)
+    lobby = Lobby.new(player) |> Lobby.add_player(player)
 
-    lobby = Lobby.new()
+    IO.inspect(socket)
 
-    socket = assign(socket, lobby: lobby)
+    socket =
+      socket
+      |> push_navigate(to: ~p"/join?lobby=#{lobby.id}&player=#{player.id}")
 
     {:noreply, socket}
   end

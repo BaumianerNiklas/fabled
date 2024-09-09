@@ -23,7 +23,11 @@ defmodule FabledWeb.Router do
     pipe_through :browser
 
     live "/", HomeLive
+    live "/game", GameLive
+    get "/join", JoinController, :join
+    post "/join", JoinController, :join
   end
+
   # Other scopes may use custom stacks.
   # scope "/api", FabledWeb do
   #   pipe_through :api
