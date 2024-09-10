@@ -33,7 +33,7 @@ defmodule FabledWeb.GameLive do
               socket
               |> assign(lobby: lobby)
               |> assign(player: player)
-              |> assign(players: lobby.players)
+              |> assign(players: lobby.players |> Enum.reverse())
               |> assign(invite_link: Lobby.invite_link(lobby.id))
 
             {:ok, socket}
@@ -50,8 +50,8 @@ defmodule FabledWeb.GameLive do
         <li><%= player.name %></li>
       <% end %>
     </ul>
-    Owner is <span><%= @lobby.owner.name %></span>
-    Invite link: <pre><%= @invite_link %> </pre>
+    <p>Owner is <%= @lobby.owner.name %></p>
+    <p>Invite link: <pre><%= @invite_link %> </pre></p>
     """
   end
 
