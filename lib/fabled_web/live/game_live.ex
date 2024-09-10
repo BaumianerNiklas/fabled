@@ -56,7 +56,7 @@ defmodule FabledWeb.GameLive do
   end
 
   def handle_info({:player_joined, player}, socket) do
-    socket = update(socket, :players, fn players -> [player | players] end)
+    socket = update(socket, :players, fn players -> players ++ [player] end)
     {:noreply, socket}
   end
 end
