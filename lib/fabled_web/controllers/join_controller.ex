@@ -17,7 +17,7 @@ defmodule FabledWeb.JoinController do
 
     conn
     |> put_session(:player_id, player.id)
-    |> redirect(to: ~p"/game?lobby=#{lobby_id}")
+    |> redirect(to: ~p"/game/#{lobby_id}")
   end
 
   def join(conn, %{"lobby" => lobby_id}) do

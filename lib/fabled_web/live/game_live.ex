@@ -3,7 +3,7 @@ defmodule FabledWeb.GameLive do
 
   alias Fabled.Lobby
 
-  def mount(%{"lobby" => lobby_id}, session, socket) do
+  def mount(%{"lobby_id" => lobby_id}, session, socket) do
     if connected?(socket) do
       Fabled.subscribe("lobby:" <> lobby_id, session["player_id"])
     end

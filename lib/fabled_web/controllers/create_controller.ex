@@ -16,6 +16,6 @@ defmodule FabledWeb.CreateController do
 
     conn
     |> put_session(:player_id, player.id)
-    |> redirect(to: ~p"/game/?lobby=#{lobby.id}")
+    |> redirect(to: ~p"/game/#{lobby.id}")
   end
 end
