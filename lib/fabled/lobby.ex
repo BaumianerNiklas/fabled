@@ -39,6 +39,15 @@ defmodule Fabled.Lobby do
     GenServer.call(__MODULE__, {:fetch_player, lobby, player_id})
   end
 
+  def has_player?(lobby_id, player_id) do
+    with {:ok, lobby} <- fetch(lobby_id),
+         {:ok, _} <- fetch_player(lobby, player_id) do
+      true
+    else
+      :error -> false
+    end
+  end
+
   ### GenServer Implementation
   # Handles access to the ETS tables
 

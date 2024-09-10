@@ -4,6 +4,10 @@ defmodule FabledWeb.GameLive do
   alias Fabled.Lobby
 
   def mount(%{"lobby" => lobby_id}, session, socket) do
+    if connected?(socket) do
+      Fabled.subscribe("lobby:" <> lobby_id, session["player_id"])
+    end
+
     case Lobby.fetch(lobby_id) do
       :error ->
         socket =
@@ -29,6 +33,7 @@ defmodule FabledWeb.GameLive do
               socket
               |> assign(lobby: lobby)
               |> assign(player: player)
+              |> assign(players: lobby.players)
 
             {:ok, socket}
         end
@@ -40,11 +45,16 @@ defmodule FabledWeb.GameLive do
     You are in lobby <%= @lobby.id %> as <%= @player.name %>
     <br /> Players:
     <ul>
-      <%= for player <- @lobby.players do %>
+      <%= for player <- @players do %>
         <li><%= player.name %></li>
       <% end %>
     </ul>
     Owner is <span><%= @lobby.owner.name %></span>
     """
+  end
+
+  def handle_info({:player_joined, player}, socket) do
+    socket = update(socket, :players, fn players -> [player | players] end)
+    {:noreply, socket}
   end
 end

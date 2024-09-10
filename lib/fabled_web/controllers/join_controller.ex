@@ -13,6 +13,8 @@ defmodule FabledWeb.JoinController do
 
     Lobby.add_player(lobby, player)
 
+    Fabled.broadcast("lobby:" <> lobby_id, {:player_joined, player})
+
     conn
     |> put_session(:player_id, player.id)
     |> redirect(to: ~p"/game?lobby=#{lobby_id}")
