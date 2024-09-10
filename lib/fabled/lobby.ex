@@ -49,7 +49,7 @@ defmodule Fabled.Lobby do
   end
 
   # TODO: change depending on environment (dev/prod)
-  def invite_link(lobby_id), do: "https://localhost:4000/join?lobby=#{lobby_id}"
+  def invite_link(lobby_id), do: "http://localhost:4000/join?lobby=#{lobby_id}"
 
   ### GenServer Implementation
   # Handles access to the ETS tables
