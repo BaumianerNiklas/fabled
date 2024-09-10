@@ -34,6 +34,7 @@ defmodule FabledWeb.GameLive do
               |> assign(lobby: lobby)
               |> assign(player: player)
               |> assign(players: lobby.players)
+              |> assign(invite_link: Lobby.invite_link(lobby.id))
 
             {:ok, socket}
         end
@@ -50,6 +51,7 @@ defmodule FabledWeb.GameLive do
       <% end %>
     </ul>
     Owner is <span><%= @lobby.owner.name %></span>
+    Invite link: <pre><%= @invite_link %> </pre>
     """
   end
 
