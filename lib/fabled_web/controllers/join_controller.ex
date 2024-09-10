@@ -4,15 +4,6 @@ defmodule FabledWeb.JoinController do
   alias Fabled.Lobby
   alias Fabled.Player
 
-  def join(conn, %{"player" => player_id, "lobby" => lobby_id}) do
-    # When both player and lobby are provided,
-    # put the player ID in the session and redirect to the lobby.
-    # This is usually called after a user created a lobby.
-    conn
-    |> put_session(:player_id, player_id)
-    |> redirect(to: ~p"/game?lobby=#{lobby_id}")
-  end
-
   def join(conn, %{"player_name" => player_name, "lobby" => lobby_id}) do
     # This is usually called after joining a lobby via invite link
 

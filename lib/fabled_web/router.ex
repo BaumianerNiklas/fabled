@@ -22,10 +22,13 @@ defmodule FabledWeb.Router do
   scope "/", FabledWeb do
     pipe_through :browser
 
-    live "/", HomeLive
-    live "/game", GameLive
+    get "/", CreateController, :index
+    post "/create", CreateController, :create
+
     get "/join", JoinController, :join
     post "/join", JoinController, :join
+
+    live "/game", GameLive
   end
 
   # Other scopes may use custom stacks.
