@@ -1,12 +1,14 @@
 defmodule FabledWeb.CreateHTML do
   use FabledWeb, :html
+  import FabledWeb.CreatePlayerForm
 
   def index(assigns) do
     ~H"""
-    <.form for={@form} action={~p"/create?player_name=#{@form[:player_name]}"}>
-      <.input type="text" field={@form[:player_name]} placeholder="your name" />
-      <button>Create new Lobby</button>
-    </.form>
+    <.create_player_form
+      form={@form}
+      action={~p"/create?player_name=#{@form[:player_name]}"}
+      button_text="Create Lobby"
+    />
     """
   end
 end
