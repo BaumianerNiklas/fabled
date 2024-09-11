@@ -53,15 +53,17 @@ defmodule FabledWeb.GameLive do
     <p>Owner is <%= @lobby.owner.name %></p>
     <p>
       Invite link:
-      <button phx-click="copy_invite_link">
+      <button phx-click={
+        JS.dispatch("fabled:copy_to_clipboard", detail: @invite_link)
+        |> JS.push("copied_invite_link")
+      }>
         <pre><%= @invite_link %> </pre>
       </button>
     </p>
     """
   end
 
-  def handle_event("copy_invite_link", _params, socket) do
-    JS.dispatch("fabled:copy_to_clipboard", detail: socket.assigns.invite_link)
+  def handle_event("copied_invite_link", _params, socket) do
     socket = put_flash(socket, :info, "Copied invite link to clipboard!")
 
     {:noreply, socket}
