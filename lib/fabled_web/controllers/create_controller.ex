@@ -5,7 +5,7 @@ defmodule FabledWeb.CreateController do
   # The home page at /
   def index(conn, _params) do
     conn
-    |> assign(:form, Phoenix.Component.to_form(%{player_name: nil}))
+    |> assign(:form, Phoenix.Component.to_form(%{"player_name" => nil}))
     |> render(:index)
   end
 
