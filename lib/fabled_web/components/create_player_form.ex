@@ -8,7 +8,7 @@ defmodule FabledWeb.CreatePlayerForm do
   def create_player_form(assigns) do
     ~H"""
     <.form for={@form} action={@action}>
-      <.input type="text" field={@form[:player_name]} placeholder="Your name" />
+      <.input type="text" field={@form[:player_name]} placeholder="Your name" autocomplete="off" />
       <button><%= @button_text %></button>
     </.form>
     """
