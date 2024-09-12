@@ -8,7 +8,7 @@ defmodule Fabled.Lobby do
   alias Fabled.Player
 
   @enforce_keys [:id, :owner]
-  defstruct [:id, :owner, players: []]
+  defstruct [:id, :owner, players: [], round: -1, stories: %{}]
 
   @type t :: %__MODULE__{
           id: String.t(),
@@ -18,6 +18,8 @@ defmodule Fabled.Lobby do
 
   ### Client Code
   # Interface the client uses to work with lobbies
+
+  defguard is_game_active(lobby) when lobby.round >= 0
 
   @spec new(Player.t()) :: t()
   def new(creator) do
@@ -39,6 +41,28 @@ defmodule Fabled.Lobby do
     GenServer.call(__MODULE__, {:fetch_player, lobby, player_id})
   end
 
+  @doc """
+  Starts the game in this lobby only if it has not yet started already.
+  Broadcasts the :game_started message to the corresponding lobby.
+  """
+  def start_game(lobby) when not is_game_active(lobby) do
+    GenServer.call(__MODULE__, {:start_game, lobby})
+  end
+
+  def player_done_with_round(lobby, player, text) when is_game_active(lobby) do
+    lobby = GenServer.call(__MODULE__, {:player_done_with_round, lobby, player, text})
+
+    if everyone_ready?(lobby) do
+      end_round(lobby)
+    end
+
+    lobby
+  end
+
+  def end_round(lobby) do
+    GenServer.call(__MODULE__, {:end_round, lobby})
+  end
+
   def has_player?(lobby_id, player_id) do
     with {:ok, lobby} <- fetch(lobby_id),
          {:ok, _} <- fetch_player(lobby, player_id) do
@@ -48,8 +72,15 @@ defmodule Fabled.Lobby do
     end
   end
 
+  def owner?(lobby, player), do: lobby.owner.id == player.id
+
   # TODO: change depending on environment (dev/prod)
   def invite_link(lobby_id), do: "http://localhost:4000/join?lobby=#{lobby_id}"
+
+  # TODO: make this actually work for rounds past the first
+  def everyone_ready?(lobby) do
+    Enum.all?(lobby.stories, fn {_, story} -> Enum.count(story) > 0 end)
+  end
 
   ### GenServer Implementation
   # Handles access to the ETS tables
@@ -104,5 +135,47 @@ defmodule Fabled.Lobby do
       nil -> {:reply, :error, table}
       player -> {:reply, {:ok, player}, table}
     end
+  end
+
+  @impl true
+  def handle_call({:start_game, lobby}, _from, table) do
+    player_ids = Enum.map(lobby.players, & &1.id)
+    stories = for id <- player_ids, into: %{}, do: {id, []}
+
+    lobby =
+      lobby
+      |> Map.put(:round, 0)
+      |> Map.put(:stories, stories)
+
+    true = :ets.insert(table, {lobby.id, lobby})
+
+    Fabled.broadcast_to_lobby(lobby.id, :game_started)
+
+    {:reply, lobby, table}
+  end
+
+  @impl true
+  def handle_call({:player_done_with_round, lobby, player, text}, _from, table) do
+    lobby =
+      Map.update!(lobby, :stories, fn stories ->
+        Map.update!(stories, player.id, fn story -> [text | story] end)
+      end)
+
+    true = :ets.insert(table, {lobby.id, lobby})
+
+    Fabled.broadcast_to_lobby(lobby.id, {:player_done_with_round, lobby})
+
+    {:reply, lobby, table}
+  end
+
+  @impl true
+  def handle_call({:end_round, lobby}, _from, table) do
+    lobby = Map.put(lobby, :round, :results)
+
+    true = :ets.insert(table, {lobby.id, lobby})
+
+    Fabled.broadcast_to_lobby(lobby.id, {:round_ended, lobby})
+
+    {:reply, lobby, table}
   end
 end

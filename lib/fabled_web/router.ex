@@ -29,6 +29,7 @@ defmodule FabledWeb.Router do
     post "/join", JoinController, :join
 
     live "/game/:lobby_id", GameLive
+    live "/game/:lobby_id/:round", GameLive
   end
 
   # Other scopes may use custom stacks.

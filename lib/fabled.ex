@@ -25,4 +25,18 @@ defmodule Fabled do
       {:error, "Player not in Lobby"}
     end
   end
+
+  def broadcast("lobby:" <> _lobby_id = topic, :game_started = message) do
+    PubSub.broadcast(Fabled.PubSub, topic, message)
+  end
+
+  def broadcast("lobby:" <> _lobby_id = topic, {:player_done_with_round, _lobby} = message) do
+    PubSub.broadcast(Fabled.PubSub, topic, message)
+  end
+
+  def broadcast("lobby" <> _lobby_id = topic, {:round_ended, _lobby} = message) do
+    PubSub.broadcast(Fabled.PubSub, topic, message)
+  end
+
+  def broadcast_to_lobby(lobby_id, message), do: broadcast("lobby:" <> lobby_id, message)
 end
