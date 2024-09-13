@@ -69,33 +69,18 @@ defmodule FabledWeb.GameLive do
     do: {:noreply, put_flash(socket, :info, "Copied invite link to clipboard!")}
 
   def handle_event("start_game", _params, socket) do
-    lobby =
-      Lobby.start_game(socket.assigns.lobby)
-      |> IO.inspect()
+    lobby = Lobby.start_game(socket.assigns.lobby)
 
     socket = assign(socket, lobby: lobby)
 
-    # {:noreply, push_patch(socket, to: ~p"/game/#{socket.assigns.lobby.id}/1")}
     {:noreply, socket}
   end
 
   def handle_event("done", %{"input" => text}, socket) do
-    lobby =
-      Lobby.player_done_with_round(socket.assigns.lobby, socket.assigns.player, text)
-      |> dbg()
+    lobby = Lobby.player_done_with_round(socket.assigns.lobby, socket.assigns.player, text)
 
-    socket = assign(socket, lobby: lobby)
-
-    {:noreply, socket}
+    {:noreply, assign(socket, lobby: lobby)}
   end
-
-  def handle_params(%{"round" => round}, _uri, socket) do
-    {round, _rest} = Integer.parse(round)
-    socket = assign(socket, round: round)
-    {:noreply, socket}
-  end
-
-  def handle_params(_params, _uri, socket), do: {:noreply, socket}
 
   def handle_info(:game_started, socket) do
     {:ok, lobby} = Lobby.fetch(socket.assigns.lobby.id)
