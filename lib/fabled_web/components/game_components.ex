@@ -1,4 +1,4 @@
-defmodule FabledWeb.LobbyComponents do
+defmodule FabledWeb.GameComponents do
   use FabledWeb, :html
 
   alias Fabled.Lobby

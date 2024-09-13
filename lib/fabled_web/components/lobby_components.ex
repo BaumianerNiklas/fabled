@@ -1,4 +1,4 @@
-defmodule FabledWeb.GameComponents do
+defmodule FabledWeb.LobbyComponents do
   use FabledWeb, :html
 
   alias Fabled.Lobby
@@ -26,8 +26,8 @@ defmodule FabledWeb.GameComponents do
         JS.dispatch("fabled:copy_to_clipboard", detail: @invite_link)
         |> JS.push("copied_invite_link")
       }>
-      <pre><%= @invite_link %> </pre>
-    </button>
+        <pre><%= @invite_link %></pre>
+      </button>
     </p>
 
     <button disabled={not @lobby_owner?} phx-click="start_game">
