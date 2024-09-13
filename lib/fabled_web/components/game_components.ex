@@ -16,14 +16,22 @@ defmodule FabledWeb.LobbyComponents do
         <button>Done!</button>
       </.form>
     <% else %>
-      <div :for={{player_id, story} <- @lobby.stories} class="border-red border-solid border-2 mt-2">
-        <% {:ok, player} = Lobby.fetch_player(@lobby, player_id) %>
-        <p>Story from <%= player.name %>:</p>
-        <ul>
-          <li :for={text <- story}><%= text %></li>
-        </ul>
-      </div>
+      <.results lobby={@lobby} />
     <% end %>
+    """
+  end
+
+  attr :lobby, Lobby, required: true
+
+  defp results(assigns) do
+    ~H"""
+    <div :for={{player_id, story} <- @lobby.stories} class="border-red border-solid border-2 mt-2">
+      <% {:ok, player} = Lobby.fetch_player(@lobby, player_id) %>
+      <p>Story from <%= player.name %>:</p>
+      <ul>
+        <li :for={text <- story}><%= text %></li>
+      </ul>
+    </div>
     """
   end
 end
