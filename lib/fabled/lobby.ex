@@ -45,10 +45,16 @@ defmodule Fabled.Lobby do
   Starts the game in this lobby only if it has not yet started already.
   Broadcasts the :game_started message to the corresponding lobby.
   """
+  @spec start_game(t()) :: t()
   def start_game(lobby) when not is_game_active(lobby) do
     GenServer.call(__MODULE__, {:start_game, lobby})
   end
 
+  @doc """
+  Signals that the player in the lobby is ready to continue to the next round.
+  If all players are ready, ends the current round
+  """
+  @spec player_done_with_round(t(), Player.t(), String.t()) :: t()
   def player_done_with_round(lobby, player, text) when is_game_active(lobby) do
     lobby = GenServer.call(__MODULE__, {:player_done_with_round, lobby, player, text})
 
@@ -59,10 +65,9 @@ defmodule Fabled.Lobby do
     lobby
   end
 
-  def end_round(lobby) do
-    GenServer.call(__MODULE__, {:end_round, lobby})
-  end
+  defp end_round(lobby), do: GenServer.call(__MODULE__, {:end_round, lobby})
 
+  @spec has_player?(String.t(), String.t()) :: boolean()
   def has_player?(lobby_id, player_id) do
     with {:ok, lobby} <- fetch(lobby_id),
          {:ok, _} <- fetch_player(lobby, player_id) do
@@ -72,12 +77,14 @@ defmodule Fabled.Lobby do
     end
   end
 
+  @spec owner?(t(), Player.t()) :: boolean()
   def owner?(lobby, player), do: lobby.owner.id == player.id
 
   # TODO: change depending on environment (dev/prod)
   def invite_link(lobby_id), do: "http://localhost:4000/join?lobby=#{lobby_id}"
 
   # TODO: make this actually work for rounds past the first
+  @spec everyone_ready?(t()) :: boolean()
   def everyone_ready?(lobby) do
     Enum.all?(lobby.stories, fn {_, story} -> Enum.count(story) > 0 end)
   end
